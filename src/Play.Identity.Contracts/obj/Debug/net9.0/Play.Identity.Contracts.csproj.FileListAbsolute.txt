@@ -1,0 +1,12 @@
+C:\git-repos\microservice\Play.Identity\src\Play.Identity.Contracts\bin\Debug\net9.0\Play.Identity.Contracts.deps.json
+C:\git-repos\microservice\Play.Identity\src\Play.Identity.Contracts\bin\Debug\net9.0\Play.Identity.Contracts.dll
+C:\git-repos\microservice\Play.Identity\src\Play.Identity.Contracts\bin\Debug\net9.0\Play.Identity.Contracts.pdb
+C:\git-repos\microservice\Play.Identity\src\Play.Identity.Contracts\obj\Debug\net9.0\Play.Identity.Contracts.GeneratedMSBuildEditorConfig.editorconfig
+C:\git-repos\microservice\Play.Identity\src\Play.Identity.Contracts\obj\Debug\net9.0\Play.Identity.Contracts.AssemblyInfoInputs.cache
+C:\git-repos\microservice\Play.Identity\src\Play.Identity.Contracts\obj\Debug\net9.0\Play.Identity.Contracts.AssemblyInfo.cs
+C:\git-repos\microservice\Play.Identity\src\Play.Identity.Contracts\obj\Debug\net9.0\Play.Identity.Contracts.csproj.CoreCompileInputs.cache
+C:\git-repos\microservice\Play.Identity\src\Play.Identity.Contracts\obj\Debug\net9.0\Play.Identity.Contracts.sourcelink.json
+C:\git-repos\microservice\Play.Identity\src\Play.Identity.Contracts\obj\Debug\net9.0\Play.Identity.Contracts.dll
+C:\git-repos\microservice\Play.Identity\src\Play.Identity.Contracts\obj\Debug\net9.0\refint\Play.Identity.Contracts.dll
+C:\git-repos\microservice\Play.Identity\src\Play.Identity.Contracts\obj\Debug\net9.0\Play.Identity.Contracts.pdb
+C:\git-repos\microservice\Play.Identity\src\Play.Identity.Contracts\obj\Debug\net9.0\ref\Play.Identity.Contracts.dll
