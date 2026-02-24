@@ -1,0 +1,65 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: play-identity
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: play-identity
+  template:
+    metadata:
+      labels:
+        app: play-identity
+    spec:
+      serviceAccountName: play-identity-sa
+      containers:
+        - name: play-identity
+          image: playeconomyapp.azurecr.io/play-identity:v1
+
+          ports:
+            - containerPort: 5000
+
+          env:
+            # ASP.NET Core port
+            - name: ASPNETCORE_URLS
+              value: "http://+:5000"
+
+            # -------------------------------
+            # MONGODB (Identity ONLY)
+            # -------------------------------
+            - name: MongoDbSettings__ConnectionString
+              valueFrom:
+                secretKeyRef:
+                  name: mongodb-secret
+                  key: connectionString
+
+            - name: MongoDbSettings__DatabaseName
+              value: "Identity"
+
+            # -------------------------------
+            # SERVICE BUS (MassTransit)
+            # -------------------------------
+            - name: ServiceBusSettings__FullyQualifiedNamespace
+              value: "sb://playeconomy-servicebus.servicebus.windows.net"
+
+            - name: MassTransitSettings__Retries
+              value: "3"
+
+            - name: MassTransitSettings__TimeIntervalInSeconds
+              value: "5"
+
+            # -------------------------------
+            # IDENTITY SERVER SETTINGS
+            # -------------------------------
+            - name: ServiceSettings__Authority
+              value: "https://play-identity"
+
+            - name: ServiceSettings__ServiceName
+              value: "play-identity"
+
+            # -------------------------------
+            # CORS
+            # -------------------------------
+            - name: AllowedOrigins
+              value: "http://play-frontend"

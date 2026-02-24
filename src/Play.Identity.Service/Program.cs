@@ -1,23 +1,17 @@
 ﻿using Duende.IdentityServer;
 using Duende.IdentityServer.Models;
 using MassTransit;
-using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.OpenApi;
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization;
 using MongoDB.Bson.Serialization.Serializers;
-using MongoDB.Driver;
 using Play.Common.MassTransit;
+using Play.Common.Messaging;
 using Play.Common.Settings;
 using Play.Identity.Service.Entities;
-using Play.Identity.Service.Exceptions;
 using Play.Identity.Service.HostedServices;
 using Play.Identity.Service.Settings;
 using Serilog;
-
-
-Console.WriteLine($"Starting Identity Service...");
-
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -33,36 +27,41 @@ builder.Host.UseSerilog();
 BsonSerializer.RegisterSerializer(typeof(Guid), new GuidSerializer(GuidRepresentation.Standard));
 BsonSerializer.RegisterSerializer(typeof(Guid?), new NullableSerializer<Guid>(new GuidSerializer(GuidRepresentation.Standard)));
 
-// Settings
-var rabbitDBSettings = builder.Configuration.GetSection(nameof(RabbitMQSettings)).Get<RabbitMQSettings>();
+// -------------------------------------------------------
+// REMOVE CosmosDbSettings (Identity does NOT use CosmosDB)
+// -------------------------------------------------------
+// builder.Services.Configure<CosmosDbSettings>(
+//     builder.Configuration.GetSection(nameof(CosmosDbSettings)));
 
-Console.WriteLine($"RabbitMQ user from config: '{rabbitDBSettings?.Username}'");
+// -------------------------------------------------------
+// ADD MongoDbSettings (Identity uses MongoDB)
+// -------------------------------------------------------
+builder.Services.Configure<MongoDbSettings>(
+    builder.Configuration.GetSection(nameof(MongoDbSettings)));
 
-const string AllowedOriginsSettings = "AllowedOrigins";
+builder.Services.Configure<ServiceSettings>(
+    builder.Configuration.GetSection(nameof(ServiceSettings)));
+
+builder.Services.Configure<ServiceBusSettings>(
+    builder.Configuration.GetSection(nameof(ServiceBusSettings)));
+
+builder.Services.Configure<MassTransitSettings>(
+    builder.Configuration.GetSection(nameof(MassTransitSettings)));
+
+builder.Services.Configure<IdentitySettings>(
+    builder.Configuration.GetSection(nameof(IdentitySettings)));
+
+builder.Services.Configure<IdentityServerSettings>(
+    builder.Configuration.GetSection(nameof(IdentityServerSettings)));
+
 var serviceSettings = builder.Configuration.GetSection(nameof(ServiceSettings)).Get<ServiceSettings>();
 var mongoDBSettings = builder.Configuration.GetSection(nameof(MongoDbSettings)).Get<MongoDbSettings>();
 var identityServerSettings = builder.Configuration.GetSection(nameof(IdentityServerSettings)).Get<IdentityServerSettings>();
-var identitySettings = builder.Configuration.GetSection(nameof(IdentitySettings));
 
-Console.WriteLine("MongoDbSettings:");
-Console.WriteLine($"  ConnectionString: {mongoDBSettings?.ConnectionString}");
-Console.WriteLine($"  DatabaseName: {mongoDBSettings?.DatabaseName}");
-
-try
-{
-    var client = new MongoClient(mongoDBSettings.ConnectionString);
-    var db = client.GetDatabase(mongoDBSettings.DatabaseName);
-    Console.WriteLine("Mongo connection test: SUCCESS");
-}
-catch (Exception ex)
-{
-    Console.WriteLine("Mongo connection test: FAILED");
-    Console.WriteLine(ex.ToString());
-}
-
-// Identity + Mongo stores
+// -------------------------------------------------------
+// Identity + Mongo stores (correct)
+// -------------------------------------------------------
 builder.Services
-    .Configure<IdentitySettings>(identitySettings)
     .AddDefaultIdentity<ApplicationUser>(options =>
     {
         options.ClaimsIdentity.RoleClaimType = "role";
@@ -73,34 +72,25 @@ builder.Services
         serviceSettings.ServiceName
     );
 
-// MassTransit
-builder.Services.AddMassTransitWithRabbitMq(retryConfigurator =>
-{
-    retryConfigurator.Interval(3, TimeSpan.FromSeconds(5));
-    retryConfigurator.Ignore(typeof(UnknownUserException));
-    retryConfigurator.Ignore(typeof(InsufficientFundsException));
-});
+// -------------------------------------------------------
+// MassTransit with Azure Service Bus (correct)
+// -------------------------------------------------------
+builder.Services.AddMassTransitWithAzureServiceBus();
 
-//  Convert appsettings clients → IdentityServer Client objects
+// Convert appsettings clients → IdentityServer Client objects
 var mappedClients = identityServerSettings.Clients.Select(c => new Client
 {
     ClientId = c.ClientId,
     ClientName = c.ClientName,
-
     AllowedGrantTypes = c.AllowedGrantTypes,
     RequireClientSecret = c.RequireClientSecret,
     RequirePkce = c.RequirePkce,
-
     RedirectUris = c.RedirectUris,
     PostLogoutRedirectUris = c.PostLogoutRedirectUris,
     AllowedCorsOrigins = c.AllowedCorsOrigins,
-
     AllowedScopes = c.AllowedScopes,
     AlwaysIncludeUserClaimsInIdToken = c.AlwaysIncludeUserClaimsInIdToken,
-
-    ClientSecrets = c.ClientSecrets?
-        .Select(s => new Secret(s.Value.Sha256()))
-        .ToList()
+    ClientSecrets = c.ClientSecrets?.Select(s => new Secret(s.Value.Sha256())).ToList()
 }).ToList();
 
 // IdentityServer
@@ -116,9 +106,6 @@ builder.Services.AddIdentityServer(options =>
     .AddInMemoryClients(mappedClients)
     .AddInMemoryIdentityResources(identityServerSettings.IdentityResources)
     .AddDeveloperSigningCredential();
-
-// Local API auth
-builder.Services.AddLocalApiAuthentication();
 
 // MVC + Razor Pages
 builder.Services.AddControllers();
@@ -144,12 +131,13 @@ builder.Services.ConfigureApplicationCookie(options =>
 builder.Services.AddCors(options =>
 {
     options.AddDefaultPolicy(policy =>
-        policy.WithOrigins(builder.Configuration.GetSection(AllowedOriginsSettings)?.Value)
+        policy.WithOrigins(builder.Configuration["AllowedOrigins"])
               .AllowAnyHeader()
               .AllowAnyMethod()
               .AllowCredentials());
 });
 
+// Health checks
 builder.Services.AddHealthChecks();
 
 var app = builder.Build();
@@ -164,9 +152,7 @@ else
     app.UseHttpsRedirection();
 }
 
-
 app.UseStaticFiles();
-
 app.UseRouting();
 
 app.UseCors();
@@ -178,6 +164,8 @@ app.UseIdentityServer();
 app.MapControllers();
 app.MapRazorPages();
 
-app.MapHealthChecks("/health");
+// Consistent health endpoint
+app.MapGet("/health", () => Results.Ok("Healthy"))
+   .AllowAnonymous();
 
 app.Run();
