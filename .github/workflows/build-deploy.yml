@@ -48,10 +48,12 @@ jobs:
       # -----------------------------------------
       # NEW: MongoDB secret for Play.Identity
       # -----------------------------------------
-      - name: Create Kubernetes secret for MongoDB
+      - name: Create Kubernetes secret for MongoDB + Identity
         run: |
           kubectl create secret generic mongodb-secret \
-            --from-literal=connectionString="${{ secrets.MONGODB_SECRET }}" \
+            --from-literal=username="${{ secrets.MONGODB_USERNAME }}" \
+            --from-literal=password="${{ secrets.MONGODB_PASSWORD }}" \
+            --from-literal=connectionString="${{ secrets.MONGODB_CONNECTION_STRING }}" \
             --dry-run=client -o yaml | kubectl apply -f -
 
       # -----------------------------------------
