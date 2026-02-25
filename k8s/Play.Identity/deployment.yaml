@@ -15,7 +15,7 @@ spec:
       serviceAccountName: play-identity-sa
       containers:
         - name: play-identity
-          image: playeconomyapp.azurecr.io/play-identity:v1
+          image: playeconomyapp.azurecr.io/play-identity:IMAGE_TAG_PLACEHOLDER
 
           ports:
             - containerPort: 5000
