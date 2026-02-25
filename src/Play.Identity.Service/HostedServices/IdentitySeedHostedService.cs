@@ -93,17 +93,28 @@ namespace Play.Identity.Service.HostedServices
         }
 
         private static async Task CreateRoleSafeAsync(
-            string role,
-            RoleManager<ApplicationRole> roleManager)
+    string role,
+    RoleManager<ApplicationRole> roleManager)
         {
-            // Try to create the role unconditionally
+            // If the role already exists, nothing to do
+            if (await roleManager.RoleExistsAsync(role))
+                return;
+
             var result = await roleManager.CreateAsync(new ApplicationRole { Name = role });
 
-            // Ignore duplicate role errors (idempotent)
-            if (!result.Succeeded &&
-                !result.Errors.Any(e => e.Code == "RoleAlreadyExists"))
+            if (!result.Succeeded)
             {
-                throw new Exception($"Failed to create role {role}: {string.Join(", ", result.Errors.Select(e => e.Description))}");
+                // Ignore duplicate errors (idempotent)
+                if (result.Errors.Any(e =>
+                    e.Code == "DuplicateRoleName" ||
+                    e.Code == "DuplicateName"))
+                {
+                    return;
+                }
+
+                // Any other error is real and should fail startup
+                throw new Exception(
+                    $"Failed to create role '{role}': {string.Join(", ", result.Errors.Select(e => e.Description))}");
             }
         }
     }
