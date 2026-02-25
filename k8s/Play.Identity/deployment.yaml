@@ -43,6 +43,9 @@ spec:
             - name: ServiceBusSettings__FullyQualifiedNamespace
               value: "sb://playeconomy-servicebus.servicebus.windows.net"
 
+            - name: ServiceBusSettings__UseManagedIdentity
+              value: "true"
+
             - name: MassTransitSettings__Retries
               value: "3"
 
