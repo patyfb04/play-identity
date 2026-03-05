@@ -57,6 +57,7 @@ builder.Services.Configure<IdentityServerSettings>(
 var serviceSettings = builder.Configuration.GetSection(nameof(ServiceSettings)).Get<ServiceSettings>();
 var mongoDBSettings = builder.Configuration.GetSection(nameof(MongoDbSettings)).Get<MongoDbSettings>();
 var identityServerSettings = builder.Configuration.GetSection(nameof(IdentityServerSettings)).Get<IdentityServerSettings>();
+var identitySettings = builder.Configuration.GetSection(nameof(IdentitySettings)).Get<IdentitySettings>();
 
 // -------------------------------------------------------
 // Identity + Mongo stores (correct)
@@ -99,6 +100,7 @@ builder.Services.AddIdentityServer(options =>
     options.Events.RaiseSuccessEvents = true;
     options.Events.RaiseFailureEvents = true;
     options.Events.RaiseErrorEvents = true;
+    options.IssuerUri = identitySettings.IssuerUri;
 })
     .AddAspNetIdentity<ApplicationUser>()
     .AddInMemoryApiScopes(identityServerSettings.ApiScopes)

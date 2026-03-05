@@ -6,5 +6,7 @@
         public string AdminUserPassword { get; init; }
 
         public decimal StartingGil {  get; init; }
+
+        public string IssuerUri { get; init; }
     }
 }
