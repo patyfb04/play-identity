@@ -155,14 +155,11 @@ else
     app.UseHttpsRedirection();
 }
 
-app.UseStaticFiles();
-
-app.UseForwardedHeaders(new ForwardedHeadersOptions
-{
-    ForwardedHeaders = ForwardedHeaders.XForwardedProto | ForwardedHeaders.XForwardedHost
-});
+app.UseForwardedHeaders();
 
 app.UsePathBase("/api/identity");
+
+app.UseStaticFiles();
 app.UseRouting();
 
 app.UseCors();
