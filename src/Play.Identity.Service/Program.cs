@@ -1,6 +1,7 @@
 ﻿using Duende.IdentityServer;
 using Duende.IdentityServer.Models;
 using MassTransit;
+using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.OpenApi;
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization;
@@ -155,6 +156,13 @@ else
 }
 
 app.UseStaticFiles();
+
+app.UseForwardedHeaders(new ForwardedHeadersOptions
+{
+    ForwardedHeaders = ForwardedHeaders.XForwardedProto | ForwardedHeaders.XForwardedHost
+});
+
+app.UsePathBase("/api/identity");
 app.UseRouting();
 
 app.UseCors();
