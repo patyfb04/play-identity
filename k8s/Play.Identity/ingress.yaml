@@ -12,7 +12,7 @@ spec:
     - http:
         paths:
           - path: /api/identity(/|$)(.*)
-            pathType: Prefix
+            pathType: ImplementationSpecific
             backend:
               service:
                 name: play-identity
@@ -20,7 +20,7 @@ spec:
                   number: 80
 
           - path: /api/catalog(/|$)(.*)
-            pathType: Prefix
+            pathType: ImplementationSpecific
             backend:
               service:
                 name: play-catalog
@@ -28,7 +28,7 @@ spec:
                   number: 80
 
           - path: /api/inventory(/|$)(.*)
-            pathType: Prefix
+            pathType: ImplementationSpecific
             backend:
               service:
                 name: play-inventory
@@ -36,7 +36,7 @@ spec:
                   number: 80
 
           - path: /api/trading(/|$)(.*)
-            pathType: Prefix
+            pathType: ImplementationSpecific
             backend:
               service:
                 name: play-trading
@@ -44,7 +44,7 @@ spec:
                   number: 80
 
           - path: /(.*)
-            pathType: Prefix
+            pathType: ImplementationSpecific
             backend:
               service:
                 name: play-frontend
