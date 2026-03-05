@@ -1,0 +1,49 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: play-ingress
+  annotations:
+    kubernetes.io/ingress.class: nginx
+spec:
+  rules:
+    - http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: play-frontend
+                port:
+                  number: 80
+
+          - path: /api/catalog
+            pathType: Prefix
+            backend:
+              service:
+                name: play-catalog
+                port:
+                  number: 80
+
+          - path: /api/inventory
+            pathType: Prefix
+            backend:
+              service:
+                name: play-inventory
+                port:
+                  number: 80
+
+          - path: /api/identity
+            pathType: Prefix
+            backend:
+              service:
+                name: play-identity
+                port:
+                  number: 80
+
+          - path: /api/trading
+            pathType: Prefix
+            backend:
+              service:
+                name: play-trading
+                port:
+                  number: 80
