@@ -4,47 +4,45 @@ metadata:
   name: play-ingress
   annotations:
     kubernetes.io/ingress.class: nginx
-    nginx.ingress.kubernetes.io/use-regex: "true"
-    nginx.ingress.kubernetes.io/rewrite-target: /$2
 spec:
   ingressClassName: nginx
   rules:
     - http:
         paths:
-          - path: /identity(/|$)(.*)
-            pathType: ImplementationSpecific
+          - path: /identity
+            pathType: Prefix
             backend:
               service:
                 name: play-identity
                 port:
                   number: 80
 
-          - path: /catalog(/|$)(.*)
-            pathType: ImplementationSpecific
+          - path: /catalog
+            pathType: Prefix
             backend:
               service:
                 name: play-catalog
                 port:
                   number: 80
 
-          - path: /inventory(/|$)(.*)
-            pathType: ImplementationSpecific
+          - path: /inventory
+            pathType: Prefix
             backend:
               service:
                 name: play-inventory
                 port:
                   number: 80
 
-          - path: /trading(/|$)(.*)
-            pathType: ImplementationSpecific
+          - path: /trading
+            pathType: Prefix
             backend:
               service:
                 name: play-trading
                 port:
                   number: 80
 
-          - path: /(.*)
-            pathType: ImplementationSpecific
+          - path: /
+            pathType: Prefix
             backend:
               service:
                 name: play-frontend
