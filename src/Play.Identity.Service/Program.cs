@@ -158,6 +158,7 @@ else
 app.UseForwardedHeaders();
 
 app.UseStaticFiles();
+app.UsePathBase("/identity");
 app.UseRouting();
 
 app.UseCors();
