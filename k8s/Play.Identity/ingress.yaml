@@ -9,8 +9,7 @@ metadata:
 spec:
   ingressClassName: nginx
   rules:
-    - host: 20.220.53.217
-      http:
+    - http:
         paths:
           - path: /identity(/|$)(.*)
             pathType: ImplementationSpecific
