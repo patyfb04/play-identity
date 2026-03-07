@@ -28,15 +28,6 @@ builder.Host.UseSerilog();
 BsonSerializer.RegisterSerializer(typeof(Guid), new GuidSerializer(GuidRepresentation.Standard));
 BsonSerializer.RegisterSerializer(typeof(Guid?), new NullableSerializer<Guid>(new GuidSerializer(GuidRepresentation.Standard)));
 
-// -------------------------------------------------------
-// REMOVE CosmosDbSettings (Identity does NOT use CosmosDB)
-// -------------------------------------------------------
-// builder.Services.Configure<CosmosDbSettings>(
-//     builder.Configuration.GetSection(nameof(CosmosDbSettings)));
-
-// -------------------------------------------------------
-// ADD MongoDbSettings (Identity uses MongoDB)
-// -------------------------------------------------------
 builder.Services.Configure<MongoDbSettings>(
     builder.Configuration.GetSection(nameof(MongoDbSettings)));
 
@@ -60,9 +51,7 @@ var mongoDBSettings = builder.Configuration.GetSection(nameof(MongoDbSettings)).
 var identityServerSettings = builder.Configuration.GetSection(nameof(IdentityServerSettings)).Get<IdentityServerSettings>();
 var identitySettings = builder.Configuration.GetSection(nameof(IdentitySettings)).Get<IdentitySettings>();
 
-// -------------------------------------------------------
-// Identity + Mongo stores (correct)
-// -------------------------------------------------------
+// Identity + Mongo stores
 builder.Services
     .AddDefaultIdentity<ApplicationUser>(options =>
     {
@@ -74,9 +63,7 @@ builder.Services
         serviceSettings.ServiceName
     );
 
-// -------------------------------------------------------
-// MassTransit with Azure Service Bus (correct)
-// -------------------------------------------------------
+// MassTransit with Azure Service Bus
 builder.Services.AddMassTransitWithAzureServiceBus();
 
 // Convert appsettings clients → IdentityServer Client objects
@@ -156,16 +143,22 @@ else
 }
 
 app.UseForwardedHeaders();
-
 app.UseStaticFiles();
+
+// MUST come before routing and IdentityServer
 app.UsePathBase("/identity");
+
 app.UseRouting();
 
+// MUST come before IdentityServer
 app.UseCors();
 
+// MUST come BEFORE Authentication/Authorization
+app.UseIdentityServer();
+
+// MUST come AFTER IdentityServer
 app.UseAuthentication();
 app.UseAuthorization();
-app.UseIdentityServer();
 
 app.MapControllers();
 app.MapRazorPages();
