@@ -157,8 +157,6 @@ else
 
 app.UseForwardedHeaders();
 
-app.UsePathBase("/api/identity");
-
 app.UseStaticFiles();
 app.UseRouting();
 
