@@ -81,7 +81,7 @@ var mappedClients = identityServerSettings.Clients.Select(c => new Client
     AllowedCorsOrigins = c.AllowedCorsOrigins,
     AllowedScopes = c.AllowedScopes,
     AlwaysIncludeUserClaimsInIdToken = c.AlwaysIncludeUserClaimsInIdToken,
-    ClientSecrets = c.ClientSecrets?.Select(s => new Secret(s.Value.Sha256())).ToList()
+    ClientSecrets = c.ClientSecrets?.Select(s => new Duende.IdentityServer.Models.Secret(s.Value.Sha256())).ToList()
 }).ToList();
 
 // IdentityServer
