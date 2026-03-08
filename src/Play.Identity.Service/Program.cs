@@ -147,6 +147,12 @@ app.UseStaticFiles();
 
 // MUST come before routing and IdentityServer
 app.UsePathBase("/identity");
+app.Use((context, next) =>
+{
+    context.Request.Path = context.Request.Path.Value!.Replace("/identity", "");
+    return next();
+});
+
 
 app.UseRouting();
 
