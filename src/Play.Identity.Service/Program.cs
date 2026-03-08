@@ -1,6 +1,7 @@
 ﻿using Duende.IdentityServer;
 using Duende.IdentityServer.Models;
 using MassTransit;
+using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.OpenApi;
 using MongoDB.Bson;
@@ -13,6 +14,7 @@ using Play.Identity.Service.Entities;
 using Play.Identity.Service.HostedServices;
 using Play.Identity.Service.Settings;
 using Serilog;
+using System.Text.Json;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -143,26 +145,19 @@ else
 }
 
 app.UseForwardedHeaders();
-app.UseStaticFiles();
 
-// MUST come before routing and IdentityServer
+// Path base for running under /identity
 app.UsePathBase("/identity");
-app.Use((context, next) =>
-{
-    context.Request.Path = context.Request.Path.Value!.Replace("/identity", "");
-    return next();
-});
 
+app.UseStaticFiles();
 
 app.UseRouting();
 
-// MUST come before IdentityServer
 app.UseCors();
 
-// MUST come BEFORE Authentication/Authorization
+// IdentityServer must be before Authentication/Authorization
 app.UseIdentityServer();
 
-// MUST come AFTER IdentityServer
 app.UseAuthentication();
 app.UseAuthorization();
 
