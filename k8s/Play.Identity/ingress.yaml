@@ -4,10 +4,18 @@ metadata:
   name: play-ingress
   annotations:
     kubernetes.io/ingress.class: nginx
+    cert-manager.io/cluster-issuer: letsencrypt-prod
 spec:
   ingressClassName: nginx
+
+  tls:
+    - hosts:
+        - 4.174.167.15.nip.io
+      secretName: play-tls
+
   rules:
-    - http:
+    - host: 4.174.167.15.nip.io
+      http:
         paths:
           - path: /identity
             pathType: Prefix

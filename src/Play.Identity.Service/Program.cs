@@ -144,7 +144,15 @@ else
     app.UseHttpsRedirection();
 }
 
-app.UseForwardedHeaders();
+app.UseForwardedHeaders(new ForwardedHeadersOptions
+{
+    ForwardedHeaders =
+        ForwardedHeaders.XForwardedFor |
+        ForwardedHeaders.XForwardedHost |
+        ForwardedHeaders.XForwardedProto |
+        ForwardedHeaders.XForwardedPrefix
+});
+
 
 // Path base for running under /identity
 app.UsePathBase("/identity");
